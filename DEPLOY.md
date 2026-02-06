@@ -16,7 +16,7 @@
 ssh root@your-vps-ip
 
 # 2. Ejecutar script de configuración inicial
-curl -fsSL https://raw.githubusercontent.com/your-username/DJ-DIDZ/main/vps-setup.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/DarnerDiaz/DJ-DIDZ/main/vps-setup.sh | sudo bash
 
 # 3. Cambiar a usuario deploy
 su - deploy
@@ -70,7 +70,7 @@ mkdir -p ~/apps/dj-didz
 cd ~/apps/dj-didz
 
 # 3. Clonar repositorio (si lo tienes en un repo público)
-git clone https://github.com/your-username/DJ-DIDZ.git .
+git clone https://github.com/DarnerDiaz/DJ-DIDZ.git .
 
 # 4. Crear archivo .env
 cat > .env << EOF
@@ -246,7 +246,7 @@ Acceder a: `http://your-vps-ip:9000`
 
 - 📚 Docs de Docker: https://docs.docker.com
 - 📚 Docs de GitHub Actions: https://docs.github.com/en/actions
-- 💬 Issues: https://github.com/your-username/DJ-DIDZ/issues
+- 💬 Issues: https://github.com/DarnerDiaz/DJ-DIDZ/issues
 - 🐛 Bugs: Incluir logs y detalles del VPS
 
 ---

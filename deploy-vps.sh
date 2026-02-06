@@ -7,7 +7,7 @@ set -e  # Exit on error
 VPS_HOST="${1:-your-vps-ip}"
 VPS_USER="${2:-ubuntu}"
 APP_DIR="~/apps/dj-didz"
-REPO_URL="https://github.com/your-username/DJ-DIDZ.git"
+REPO_URL="https://github.com/DarnerDiaz/DJ-DIDZ.git"
 BRANCH="main"
 
 echo "🚀 Iniciando despliegue de DJ DIDZ..."
