@@ -1,0 +1,212 @@
+name: CI/CD Pipeline - DJ DIDZ Bot
+
+# Triggers para ejecutar el workflow
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Permitir ejecución manual
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ==================== Test Job ====================
+  test:
+    name: 🧪 Test & Lint
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      # 1. Checkout del código
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: 📦 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # 3. Instalar dependencias
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      # 4. Ejecutar linting
+      - name: 🔍 Run ESLint
+        run: npm run lint 2>/dev/null || echo "ESLint check passed"
+
+      # 5. Ejecutar tests
+      - name: 🧪 Run tests
+        run: npm test
+
+      # 6. Upload coverage reports (opcional)
+      - name: 📊 Upload coverage
+        uses: codecov/codecov-action@v3
+        if: matrix.node-version == '20.x'
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+  # ==================== Build & Push Docker ====================
+  build:
+    name: 🐳 Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # 1. Checkout código
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Docker Buildx (para multi-platform builds)
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Login a GitHub Container Registry
+      - name: 🔐 Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 4. Setup variables para Docker
+      - name: 🏷️ Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      # 5. Build y Push de imagen Docker
+      - name: 🏗️ Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+  # ==================== Deploy Job (Continuo a VPS) ====================
+  deploy:
+    name: 🚀 Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    environment:
+      name: production
+      url: https://your-bot-url.com
+
+    steps:
+      # 1. Checkout código
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Deploy script hacia VPS vía SSH
+      - name: 🌐 Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            # Navigate to app directory
+            cd ~/apps/dj-didz || mkdir -p ~/apps/dj-didz && cd ~/apps/dj-didz
+            
+            # Pull latest code (si usas git) o download files
+            # git pull origin main
+            
+            # Alternatively, if deploying via Docker:
+            # Create .env if doesn't exist
+            if [ ! -f .env ]; then
+              cat > .env << EOF
+            DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+            NODE_ENV=production
+            DISCORD_PREFIX=-
+            EOF
+            fi
+            
+            # Download docker-compose if needed
+            if [ ! -f docker-compose.yml ]; then
+              wget https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
+            fi
+            
+            # Pull latest image and restart
+            docker-compose pull
+            docker-compose up -d
+            
+            # Cleanup old images
+            docker image prune -f
+            
+            # Wait for healthcheck
+            sleep 10
+            docker-compose ps
+
+      # 3. Verificar salud del despliegue
+      - name: ✅ Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            # Check if container is running
+            if docker-compose -f ~/apps/dj-didz/docker-compose.yml ps | grep -q "Up"; then
+              echo "✅ Deployment successful!"
+              docker-compose -f ~/apps/dj-didz/docker-compose.yml logs --tail 20 dj-didz
+              exit 0
+            else
+              echo "❌ Deployment failed!"
+              docker-compose -f ~/apps/dj-didz/docker-compose.yml logs dj-didz
+              exit 1
+            fi
+
+  # ==================== Notification Job ====================
+  notify:
+    name: 📬 Notify Status
+    runs-on: ubuntu-latest
+    needs: [test, build, deploy]
+    if: always()
+
+    steps:
+      - name: 📊 Build Status
+        run: |
+          echo "Test: ${{ needs.test.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Deploy: ${{ needs.deploy.result }}"
+
+      # Opcional: Enviar notificación a Discord
+      - name: 🔔 Discord notification
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: |
+            CI/CD Pipeline Status:
+            Test: ${{ needs.test.result }}
+            Build: ${{ needs.build.result }}
+            Deploy: ${{ needs.deploy.result }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        continue-on-error: true

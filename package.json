@@ -1,0 +1,32 @@
+{
+  "name": "dj-didz",
+  "version": "1.0.0",
+  "description": "Advanced Discord Music Bot - DJ DIDZ",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": ["discord", "bot", "music", "distube"],
+  "author": "Developer",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@discordjs/opus": "^0.10.0",
+    "@discordjs/voice": "^0.19.0",
+    "@distube/youtube": "^1.0.4",
+    "@distube/yt-dlp": "^2.0.1",
+    "@distube/ytdl-core": "^4.16.12",
+    "@snazzah/davey": "^0.1.9",
+    "discord.js": "^14.25.1",
+    "distube": "^5.2.3",
+    "dotenv": "^17.2.3",
+    "ffmpeg-static": "^5.3.0",
+    "libsodium-wrappers": "^0.8.1",
+    "yt-dlp-exec": "^1.0.2"
+  }
+}

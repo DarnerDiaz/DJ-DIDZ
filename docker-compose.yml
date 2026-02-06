@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  dj-didz:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dj-didz-bot
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_PREFIX=${DISCORD_PREFIX:-!}
+      - LOG_LEVEL=info
+    env_file:
+      - .env
+    volumes:
+      # Opcional: mantener logs persistentes
+      - ./logs:/app/logs
+    networks:
+      - dj-didz-network
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  dj-didz-network:
+    driver: bridge
