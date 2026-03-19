@@ -112,7 +112,7 @@ jobs:
     name: 🚀 Deploy to VPS
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && secrets.VPS_HOST != '' && secrets.VPS_USER != '' && secrets.VPS_SSH_KEY != '' && secrets.DISCORD_TOKEN != ''
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     environment:
       name: production
       url: https://your-bot-url.com
@@ -122,8 +122,21 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      # 2. Deploy script hacia VPS vía SSH
+      # 2. Validar secretos requeridos para deploy
+      - name: 🔎 Check deploy secrets
+        id: deploy_check
+        run: |
+          if [ -z "${{ secrets.VPS_HOST }}" ] || [ -z "${{ secrets.VPS_USER }}" ] || [ -z "${{ secrets.VPS_SSH_KEY }}" ] || [ -z "${{ secrets.DISCORD_TOKEN }}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Deploy skipped: missing VPS/SSH secrets"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Deploy enabled: all required secrets are present"
+          fi
+
+      # 3. Deploy script hacia VPS vía SSH
       - name: 🌐 Deploy to VPS
+        if: steps.deploy_check.outputs.enabled == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -163,8 +176,9 @@ jobs:
             sleep 10
             docker-compose ps
 
-      # 3. Verificar salud del despliegue
+      # 4. Verificar salud del despliegue
       - name: ✅ Verify deployment
+        if: steps.deploy_check.outputs.enabled == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -182,6 +196,11 @@ jobs:
               docker-compose -f ~/apps/dj-didz/docker-compose.yml logs dj-didz
               exit 1
             fi
+
+      # 5. Mensaje explícito cuando deploy no aplica
+      - name: ⏭️ Skip deployment
+        if: steps.deploy_check.outputs.enabled != 'true'
+        run: echo "Deploy omitted because VPS secrets are not configured."
 
   # ==================== Notification Job ====================
   notify:
