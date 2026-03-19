@@ -160,12 +160,12 @@ describe('DJ DIDZ Bot - Configuration Tests', () => {
 
       test('createErrorEmbed should have error color', () => {
         const embed = embeds.createErrorEmbed('Error', 'Error message');
-        expect(embed.data.color).toBe(parseInt('#FF0000', 16));
+        expect(embed.data.color).toBe(parseInt('FF0000', 16));
       });
 
       test('createSuccessEmbed should have success color', () => {
         const embed = embeds.createSuccessEmbed('Success', 'Success message');
-        expect(embed.data.color).toBe(parseInt('#00AA00', 16));
+        expect(embed.data.color).toBe(parseInt('00AA00', 16));
       });
 
       test('createQueueEmbed should handle empty queue', () => {
