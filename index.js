@@ -1,265 +1,237 @@
+#!/usr/bin/env node
+
+/**
+ * DJ DIDZ - Advanced Discord Music Bot
+ * Main entry point with refactored, modular architecture
+ * 
+ * Development: npm run dev
+ * Production: npm start
+ */
+
 require('dotenv').config();
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+
+const { Client, GatewayIntentBits } = require('discord.js');
 const { DisTube } = require('distube');
 const { YouTubePlugin } = require('@distube/youtube');
 const ffmpeg = require('ffmpeg-static');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.MessageContent
-  ]
-});
+// Import utilities and modules
+const logger = require('./src/utils/logger');
+const config = require('./src/config');
+const { loadCommands, getCommand, getAllCommands } = require('./src/commands/loader');
+const { registerDistubeEvents } = require('./src/events/distube');
+const { registerClientEvents } = require('./src/events/client');
+const { checkRateLimit } = require('./src/middleware/rateLimiter');
+const { createErrorEmbed } = require('./src/utils/embeds');
 
-const distube = new DisTube(client, {
-  plugins: [new YouTubePlugin({ 
-    ytdlOptions: { 
-      highWaterMark: 1 << 25,
-      filter: 'audioonly',
-      quality: 'highestaudio'
-    } 
-  })],
-  emitNewSongOnly: true,
-  ffmpeg: { path: ffmpeg }
-});
-
-// Utilidades
-const PREFIX = process.env.DISCORD_PREFIX || '!';
-
-const createEmbed = (title, description, color = '#0099ff') => {
-  return new EmbedBuilder()
-    .setColor(color)
-    .setTitle(title)
-    .setDescription(description)
-    .setTimestamp();
-};
-
-const commands = {
-  play: 'Reproduce una canción (ej: -play nombre canción)',
-  stop: 'Detiene la música',
-  pause: 'Pausa la canción actual',
-  resume: 'Reanuda la canción pausado',
-  skip: 'Salta a la siguiente canción',
-  queue: 'Muestra la cola de reproducción',
-  np: 'Muestra la canción que se está reproduciendo',
-  volume: 'Cambia el volumen (ej: -volume 50)',
-  help: 'Muestra esta ayuda'
-};
-
-// ==================== HEARTBEAT ====================
-// Escribir archivo de latido cada 60 segundos para healthcheck
-setInterval(() => {
-  const heartbeatFile = path.join(__dirname, '.heartbeat');
-  fs.writeFile(heartbeatFile, Date.now().toString(), (err) => {
-    if (err) console.error('Error writing heartbeat:', err);
-  });
-}, 30000); // Actualizar cada 30 segundos
-
-client.on('ready', () => {
-  console.log(`✅ DJ DIDZ listo. Operando desde Arequipa para el mundo.`);
-  client.user.setActivity('-help para comandos', { type: 'LISTENING' });
-});
-
-client.on('messageCreate', async (message) => {
-  if (message.author.bot || !message.content.startsWith(PREFIX)) return;
-
-  const args = message.content.slice(PREFIX.length).trim().split(/ +/g);
-  const command = args.shift().toLowerCase();
-
+/**
+ * Validate configuration before startup
+ */
+function validateSetup() {
   try {
-    switch (command) {
-      case 'play': {
-        const voiceChannel = message.member.voice.channel;
-        if (!voiceChannel) {
-          return message.reply({ embeds: [createEmbed('⚠️ Error', '¡Brother, entra a un canal de voz!', '#FF0000')] });
-        }
-        
-        const query = args.join(' ');
-        if (!query) {
-          return message.reply({ embeds: [createEmbed('⚠️ Error', 'Dime qué canción quieres reproducir.', '#FF0000')] });
-        }
-
-        await distube.play(voiceChannel, query, {
-          message,
-          textChannel: message.channel,
-          member: message.member
-        });
-        break;
-      }
-
-      case 'stop': {
-        const queue = distube.getQueue(message);
-        if (!queue) {
-          return message.reply({ embeds: [createEmbed('⚠️ Error', 'No hay música reproduciéndose.', '#FF0000')] });
-        }
-        distube.stop(message);
-        message.reply({ embeds: [createEmbed('⏹️ Detenido', 'DJ DIDZ fuera.', '#00AA00')] });
-        break;
-      }
-
-      case 'pause': {
-        const queue = distube.getQueue(message);
-        if (!queue) {
-          return message.reply({ embeds: [createEmbed('⚠️ Error', 'No hay música reproduciéndose.', '#FF0000')] });
-        }
-        if (queue.paused) {
-          return message.reply({ embeds: [createEmbed('⚠️ Información', 'La música ya está pausada.', '#FFAA00')] });
-        }
-        queue.pause();
-        message.reply({ embeds: [createEmbed('⏸️ Pausado', 'Música pausada.', '#FFAA00')] });
-        break;
-      }
-
-      case 'resume': {
-        const queue = distube.getQueue(message);
-        if (!queue) {
-          return message.reply({ embeds: [createEmbed('⚠️ Error', 'No hay música reproduciéndose.', '#FF0000')] });
-        }
-        if (!queue.paused) {
-          return message.reply({ embeds: [createEmbed('⚠️ Información', 'La música ya está reproduciéndose.', '#FFAA00')] });
-        }
-        queue.resume();
-        message.reply({ embeds: [createEmbed('▶️ Reanudado', 'Música reanudada.', '#00AA00')] });
-        break;
-      }
-
-      case 'skip': {
-        const queue = distube.getQueue(message);
-        if (!queue) {
-          return message.reply({ embeds: [createEmbed('⚠️ Error', 'No hay música reproduciéndose.', '#FF0000')] });
-        }
-        const currentSong = queue.songs[0];
-        queue.skip();
-        message.reply({ embeds: [createEmbed('⏭️ Saltado', `Se saltó: ${currentSong.name}`, '#00AA00')] });
-        break;
-      }
-
-      case 'queue': {
-        const queue = distube.getQueue(message);
-        if (!queue || queue.songs.length === 0) {
-          return message.reply({ embeds: [createEmbed('📋 Cola', 'La cola está vacía.', '#FFAA00')] });
-        }
-        
-        const queueList = queue.songs
-          .slice(0, 10)
-          .map((song, i) => `${i + 1}. **${song.name}** (${song.formattedDuration})`)
-          .join('\n');
-
-        const embed = new EmbedBuilder()
-          .setColor('#0099ff')
-          .setTitle('📋 Cola de Reproducción')
-          .setDescription(queueList)
-          .setFooter({ text: `${queue.songs.length} canciones en cola` })
-          .setTimestamp();
-
-        message.reply({ embeds: [embed] });
-        break;
-      }
-
-      case 'np': {
-        const queue = distube.getQueue(message);
-        if (!queue || !queue.songs[0]) {
-          return message.reply({ embeds: [createEmbed('⚠️ Error', 'No hay música reproduciéndose.', '#FF0000')] });
-        }
-
-        const song = queue.songs[0];
-        const embed = new EmbedBuilder()
-          .setColor('#0099ff')
-          .setTitle('🎶 Reproduciendo Ahora')
-          .setDescription(`**${song.name}**`)
-          .addFields(
-            { name: 'Duración', value: song.formattedDuration, inline: true },
-            { name: 'Volumen', value: `${queue.volume}%`, inline: true }
-          )
-          .setTimestamp();
-
-        message.reply({ embeds: [embed] });
-        break;
-      }
-
-      case 'volume': {
-        const queue = distube.getQueue(message);
-        if (!queue) {
-          return message.reply({ embeds: [createEmbed('⚠️ Error', 'No hay música reproduciéndose.', '#FF0000')] });
-        }
-
-        const vol = parseInt(args[0]);
-        if (isNaN(vol) || vol < 0 || vol > 100) {
-          return message.reply({ embeds: [createEmbed('⚠️ Error', 'Usa un volumen entre 0 y 100.', '#FF0000')] });
-        }
-
-        queue.setVolume(vol);
-        message.reply({ embeds: [createEmbed('🔊 Volumen', `Volumen ajustado a ${vol}%`, '#00AA00')] });
-        break;
-      }
-
-      case 'help': {
-        const helpText = Object.entries(commands)
-          .map(([cmd, desc]) => `**!${cmd}** - ${desc}`)
-          .join('\n');
-
-        const embed = new EmbedBuilder()
-          .setColor('#0099ff')
-          .setTitle('📖 Comandos de DJ DIDZ')
-          .setDescription(helpText)
-          .setFooter({ text: 'DJ DIDZ v1.0.0 - Operando desde Arequipa' })
-          .setTimestamp();
-
-        message.reply({ embeds: [embed] });
-        break;
-      }
-
-      default:
-        break;
-    }
+    config.validateConfig();
+    logger.info('✅ Configuration validated');
+    return true;
   } catch (error) {
-    console.error('Error en comando:', error);
-    message.reply({ embeds: [createEmbed('❌ Error', 'Ocurrió un error procesando el comando.', '#FF0000')] });
+    logger.error('❌ Configuration validation failed:', { error: error.message });
+    process.exit(1);
   }
-});
+}
 
-// Eventos de DisTube
-distube.on('error', (channel, e) => {
-  console.error('Error en DisTube:', e);
-  
-  const errorMsg = (e && e.message) ? e.message.slice(0, 100) : 'Fallo en el stream de YouTube';
-  
-  if (channel && typeof channel.send === 'function') {
-    channel.send({ embeds: [createEmbed('❌ Error Técnico', errorMsg, '#FF0000')] });
+/**
+ * Initialize Discord client
+ */
+function initializeClient() {
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.GuildVoiceStates,
+      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.DirectMessages
+    ]
+  });
+
+  logger.info('Discord client initialized');
+  return client;
+}
+
+/**
+ * Initialize DisTube
+ */
+function initializeDistube(client) {
+  const distube = new DisTube(client, {
+    plugins: [
+      new YouTubePlugin({
+        ytdlOptions: {
+          highWaterMark: 1 << 25,
+          filter: 'audioonly',
+          quality: 'highestaudio'
+        }
+      })
+    ],
+    emitNewSongOnly: true,
+    ffmpeg: { path: ffmpeg },
+    leaveOnFinish: false,
+    leaveOnEmpty: true,
+    emptyCooldown: 60000
+  });
+
+  logger.info('DisTube initialized');
+  return distube;
+}
+
+/**
+ * Setup heartbeat for health checks
+ */
+function setupHeartbeat() {
+  const heartbeatInterval = setInterval(() => {
+    const heartbeatFile = path.join(__dirname, '.heartbeat');
+    fs.writeFile(heartbeatFile, Date.now().toString(), (err) => {
+      if (err) {
+        logger.error('Error writing heartbeat:', { error: err.message });
+      }
+    });
+  }, 30000); // Every 30 seconds
+
+  logger.info('Heartbeat monitoring started');
+  return heartbeatInterval;
+}
+
+/**
+ * Main application startup
+ */
+async function start() {
+  logger.info('╔════════════════════════════════════════╗');
+  logger.info('║     DJ DIDZ - Music Bot Starting      ║');
+  logger.info('║  Advanced Discord Music Experience    ║');
+  logger.info('╚════════════════════════════════════════╝');
+
+  // Validate configuration
+  validateSetup();
+
+  // Initialize client and distube
+  const client = initializeClient();
+  const distube = initializeDistube(client);
+
+  // Load commands
+  const commandsMap = loadCommands();
+  const allCommands = getAllCommands(commandsMap);
+
+  logger.info(`Loaded ${allCommands.length} unique commands`);
+
+  // Register event handlers
+  registerClientEvents(client);
+  registerDistubeEvents(distube);
+
+  // Setup heartbeat
+  setupHeartbeat();
+
+  /**
+   * Message create handler - main command processor
+   */
+  client.on('messageCreate', async (message) => {
+    // Ignore own messages and non-command messages
+    if (message.author.bot || !message.content.startsWith(config.DISCORD_PREFIX)) {
+      return;
+    }
+
+    // Parse command and arguments
+    const args = message.content.slice(config.DISCORD_PREFIX.length).trim().split(/ +/g);
+    const commandName = args.shift().toLowerCase();
+
+    // Rate limiting check
+    const rateLimitCheck = checkRateLimit(message);
+    if (!rateLimitCheck.allowed) {
+      const retryAfter = rateLimitCheck.retryAfter || 5;
+      logger.warn('Rate limit triggered', { userId: message.author.id, retryAfter });
+      return message.reply({
+        embeds: [createErrorEmbed(
+          '⏳ Rate Limited',
+          `Please wait ${retryAfter}s before using another command.`
+        )]
+      });
+    }
+
+    // Get command
+    const command = getCommand(commandsMap, commandName);
+
+    if (!command) {
+      // Silent fail - don't respond to unknown commands
+      logger.debug('Unknown command attempted', { command: commandName, user: message.author.username });
+      return;
+    }
+
+    try {
+      logger.debug('Executing command:', {
+        command: command.name,
+        user: message.author.username,
+        guild: message.guild?.name || 'DM',
+        args: args.slice(0, 3)
+      });
+
+      // Execute command
+      const result = await command.run(
+        message,
+        args,
+        {
+          distube,
+          client,
+          allCommands,
+          config
+        }
+      );
+
+      if (!result.success && result.error) {
+        logger.warn(`Command execution failed: ${command.name}`, { error: result.error });
+      }
+    } catch (error) {
+      logger.error(`Critical error executing command ${command.name}:`, {
+        error: error.message,
+        stack: error.stack
+      });
+
+      message.reply({
+        embeds: [createErrorEmbed('❌ Critical Error', 'An unexpected error occurred. Please try again later.')]
+      }).catch(err => logger.error('Error sending error message:', { error: err.message }));
+    }
+  });
+
+  /**
+   * Handle process-level errors
+   */
+  process.on('unhandledRejection', (_reason, _promise) => {
+    logger.error('Unhandled Promise Rejection:', { reason: String(_reason) });
+  });
+
+  process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception:', { error: error.message, stack: error.stack });
+    // Don't exit - let the bot keep running
+  });
+
+  /**
+   * Graceful shutdown
+   */
+  process.on('SIGINT', async () => {
+    logger.info('Shutdown signal received, closing gracefully...');
+    await client.destroy();
+    process.exit(0);
+  });
+
+  // Login to Discord
+  try {
+    await client.login(config.DISCORD_TOKEN);
+    logger.info('🎉 Bot successfully logged into Discord');
+  } catch (error) {
+    logger.error('Failed to login to Discord:', { error: error.message });
+    process.exit(1);
   }
-});
+}
 
-distube.on('playSong', (queue, song) => {
-  const embed = new EmbedBuilder()
-    .setColor('#00AA00')
-    .setTitle('🎶 Reproduciendo Ahora')
-    .setDescription(`**${song.name}**`)
-    .addFields(
-      { name: 'Duración', value: song.formattedDuration, inline: true },
-      { name: 'Solicitado por', value: `${song.user || 'Desconocido'}`, inline: true }
-    );
-  
-  queue.textChannel.send({ embeds: [embed] });
+// Start the bot
+start().catch(error => {
+  logger.error('Fatal startup error:', { error: error.message });
+  process.exit(1);
 });
-
-distube.on('addSong', (queue, song) => {
-  const embed = new EmbedBuilder()
-    .setColor('#FFAA00')
-    .setDescription(`✅ **${song.name}** agregado a la cola.`);
-  
-  queue.textChannel.send({ embeds: [embed] });
-});
-
-distube.on('finish', (queue) => {
-  const embed = new EmbedBuilder()
-    .setColor('#0099ff')
-    .setDescription('✅ Cola finalizada. ¡Gracias por escuchar a DJ DIDZ!');
-  
-  queue.textChannel.send({ embeds: [embed] });
-});
-
-client.login(process.env.DISCORD_TOKEN);

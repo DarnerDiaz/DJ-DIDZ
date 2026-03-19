@@ -1,311 +1,583 @@
-# DJ DIDZ - Advanced Discord Music Bot 🎶
+<!-- Header con ASCII Art -->
+<div align="center">
 
-Un bot de Discord profesional y completamente funcional para reproducir música con características avanzadas, manejo de errores robusto y despliegue automático con CI/CD.
+```
+  ██████╗ ██╗       ██████╗ ██╗██████╗ ███████╗
+  ██╔══██╗██║       ██╔══██╗██║██╔══██╗██╔════╝
+  ██║  ██║██║       ██║  ██║██║██║  ██║███████╗
+  ██║  ██║██║       ██║  ██║██║██║  ██║╚════██║
+  ██████╔╝███████╗  ██████╔╝██║██████╔╝███████║
+  ╚═════╝ ╚══════╝  ╚═════╝ ╚═╝╚═════╝ ╚══════╝
+                                           
+          🎶 Advanced Discord Music Bot
+```
 
-## 📋 Características
+**Professional • Modular • Production-Ready**
 
-✅ **Reproducción de Música**
-- Integración con YouTube y Spotify
-- Calidad de audio configurable
-- Caché de canciones para mejor rendimiento
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org/)
+[![Discord.js](https://img.shields.io/badge/Discord.js-14.25-purple.svg)](https://discord.js.org/)
+[![Test Coverage](https://img.shields.io/badge/Tests-Jest-red.svg)](https://jestjs.io/)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
-✅ **Comandos Completos**
-- `-play <canción>` - Reproduce una canción
-- `-stop` - Detiene la música
-- `-pause` - Pausa la canción actual
-- `-resume` - Reanuda la música
-- `-skip` - Salta a la siguiente canción
-- `-queue` - Muestra la cola de reproducción (máximo 10)
-- `-np` - Muestra la canción actual
-- `-volume <0-100>` - Ajusta el volumen
-- `-help` - Muestra ayuda sobre los comandos
+[🎯 Features](#-features) • [🚀 Quick Start](#-quick-start) • [📚 Documentation](#-documentation) • [🐳 Docker](#-docker) • [🆘 Support](#-support)
 
-✅ **Características de Producción**
-- Manejo robusto de errores
-- Embeds Discord elegantes y profesionales
-- Healthcheck integrado
-- Logging estructurado
-- Seguridad: usuario no-root en Docker
+</div>
 
-✅ **CI/CD y DevOps**
-- Pipeline automático con GitHub Actions
-- Linting y tests automáticos
-- Build y push a Docker Hub
-- Despliegue automático a VPS
+---
 
-## 🚀 Inicio Rápido
+## 🎯 Features
 
-### Requisitos
-- Node.js 20+
-- FFmpeg instalado
-- Token de Discord Bot
+<table>
+<tr>
+<td width="50%">
 
-### Instalación Local
+### 🎵 Music Playback
+- ▶️ YouTube & Spotify integration
+- 🎚️ Quality configuration
+- 💾 Smart caching
+- 📋 Queue management
+- 🔊 Volume control
+
+### 🛡️ Security & Stability
+- ⚡ Rate limiting
+- ✅ Input validation
+- 🔐 XSS prevention
+- 📊 Error tracking
+- 🏥 Health checks
+
+</td>
+<td width="50%">
+
+### 🏗️ Architecture
+- 🧩 Modular design
+- 📦 20+ modules
+- 🧪 Jest tests
+- 📝 Full JSDoc
+- ✨ ESLint compliant
+
+### 🚀 DevOps
+- 🐳 Docker ready
+- 🔄 CI/CD pipeline
+- 📈 Winston logging
+- 🌍 Multi-platform
+- 💾 Data persistence
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📋 Commands
+
+| Command | Alias | Description | Example |
+|---------|-------|-------------|---------|
+| **play** | `p` | 🎵 Play a song | `-play lo-fi beats` |
+| **stop** | `s` | ⏹️ Stop playback | `-stop` |
+| **pause** | `pa` | ⏸️ Pause current | `-pause` |
+| **resume** | `res` | ▶️ Resume music | `-resume` |
+| **skip** | `sk` | ⏭️ Skip to next | `-skip` |
+| **queue** | `q` | 📋 Show queue | `-queue 1` |
+| **nowplaying** | `np` | 🎶 Current song | `-np` |
+| **volume** | `vol` | 🔊 Set volume | `-volume 75` |
+| **help** | `?` | ❓ Show commands | `-help` |
+
+---
+
+## 🚀 Quick Start
+
+### 📋 Prerequisites
 
 ```bash
-# Clonar repositorio
-git clone <your-repo-url>
-cd DJ-DIDZ
+✅ Node.js 18+ (20+ recommended)
+✅ FFmpeg installed
+✅ Discord Bot Token (from Discord Developer Portal)
+✅ Git (optional, for cloning)
+```
 
-# Instalar dependencias
+**Get your Discord Bot Token:**
+1. Visit [Discord Developer Portal](https://discord.com/developers/applications)
+2. Create new application
+3. Go to "Bot" → Create Bot
+4. Copy the token
+5. Enable "Message Content Intent"
+
+### ⚡ Installation
+
+```bash
+# 1️⃣  Clone the repository
+git clone https://github.com/yourusername/dj-didz.git
+cd dj-didz
+
+# 2️⃣  Install dependencies
 npm install
 
-# Crear archivo .env
+# 3️⃣  Create environment file
 cp .env.example .env
-# Editar .env y agregar tu DISCORD_TOKEN
+
+# 4️⃣  Edit .env with your token
+# DISCORD_TOKEN=your_token_here
 ```
 
-### Variables de Entorno (`.env`)
-```env
-DISCORD_TOKEN=your_bot_token_here
-DISCORD_PREFIX=-
-NODE_ENV=production
-```
-
-### Ejecutar el Bot
+### 🎮 Running the Bot
 
 ```bash
-# Modo desarrollo (con auto-reload)
+# 🔧 Development (with auto-reload)
 npm run dev
 
-# Modo producción
+# 📦 Production
 npm start
 
-# Ejecutar tests
+# 🧪 Run tests
 npm test
 
-# Linting
+# 🔍 Check code quality
 npm run lint
 npm run lint:fix
 ```
 
-## 🐳 Docker
+### ⚙️ Configuration (`.env`)
 
-### Build y Run con Docker
+```env
+# 🔴 REQUIRED
+DISCORD_TOKEN=your_bot_token_here
 
-```bash
-# Build de la imagen
-docker build -t dj-didz:latest .
-
-# Run de un contenedor
-docker run \
-  -e DISCORD_TOKEN=your_token_here \
-  -e NODE_ENV=production \
-  --name dj-didz \
-  dj-didz:latest
+# 🟢 OPTIONAL (defaults provided)
+DISCORD_PREFIX=-                      # Command prefix
+BOT_NAME=DJ DIDZ                      # Bot display name
+NODE_ENV=development                  # development|production
+LOG_LEVEL=info                        # debug|info|warn|error
+RATE_LIMIT_ENABLED=true               # Enable rate limiting
+RATE_LIMIT_MAX_COMMANDS=5             # Max commands per window
+RATE_LIMIT_WINDOW_MS=10000            # Window in milliseconds
+DEFAULT_VOLUME=50                     # Default volume (0-100)
 ```
-
-### Docker Compose (Recomendado)
-
-```bash
-# Crear .env con tus credenciales
-echo "DISCORD_TOKEN=your_token_here" > .env
-
-# Iniciar servicio
-docker-compose up -d
-
-# Ver logs
-docker-compose logs -f dj-didz
-
-# Detener servicio
-docker-compose down
-```
-
-## 🔄 CI/CD con GitHub Actions
-
-El proyecto incluye un pipeline automático que:
-
-1. **Valida el código** - Ejecuta linting y tests
-2. **Construye imagen Docker** - Multi-stage build optimizado
-3. **Push a Docker Hub** - Si está configurado
-4. **Despliega a VPS** - Via SSH (opcional)
-
-### Configuración de Secrets en GitHub
-
-En tu repositorio, ve a `Settings → Secrets and variables → Actions` y agrega:
-
-```
-DOCKER_USERNAME     - Tu usuario de Docker Hub
-DOCKER_PASSWORD     - Tu token de Docker Hub
-VPS_HOST           - IP o dominio del VPS
-VPS_USER           - Usuario SSH del VPS
-VPS_SSH_KEY        - Private key SSH (id_rsa)
-DISCORD_TOKEN      - Token del bot de Discord
-```
-
-### Ver Workflows
-
-```bash
-# Los workflows se ejecutan automáticamente en:
-# - Push a main/master
-# - Pull requests
-# - Manualmente desde Actions tab
-```
-
-## 📊 Estructura del Proyecto
-
-```
-.
-├── index.js                    # Código principal del bot
-├── healthcheck.js              # Script de salud del contenedor
-├── package.json                # Dependencias y scripts
-├── Dockerfile                  # Imagen Docker multi-stage
-├── docker-compose.yml          # Orquestación con Docker Compose
-├── .env.example                # Plantilla de variables de entorno
-├── .eslintrc.json             # Configuración de linting
-├── .dockerignore               # Archivos a excluir de Docker
-├── .github/
-│   └── workflows/
-│       └── ci-cd.yml          # Pipeline de GitHub Actions
-├── tests/
-│   └── bot.test.js            # Tests automáticos
-└── README.md                   # Este archivo
-```
-
-## 🧪 Testing
-
-El proyecto incluye tests para:
-- Validar variables de entorno
-- Verificar instalación de dependencias
-- Confirmar estructura de archivos
-- Documentación del código
-
-```bash
-npm test              # Ejecutar tests una sola vez
-npm run test:watch   # Ejecutar tests con auto-reload
-```
-
-## 🚢 Despliegue en VPS (DigitalOcean / AWS)
-
-### Opción 1: Usando Docker Compose en el VPS
-
-```bash
-# En tu VPS
-# 1. Instalar Docker y Docker Compose
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
-# 2. Clonar repositorio
-git clone <your-repo-url>
-cd DJ-DIDZ
-
-# 3. Configurar variables
-cp .env.example .env
-nano .env  # Editar con tu token
-
-# 4. Iniciar con Docker Compose
-docker-compose up -d
-
-# 5. Ver logs
-docker-compose logs -f dj-didz
-
-# 6. Reiniciar si es necesario
-docker-compose restart dj-didz
-```
-
-### Opción 2: Despliegue Automático con GitHub Actions
-
-El workflow automático puede desplegar en tu VPS:
-
-```yaml
-# En .github/workflows/ci-cd.yml (ya configurado)
-# El deploy se ejecuta automáticamente después de pasar los tests
-```
-
-**Primer setup en VPS:**
-```bash
-# SSH en tu VPS
-ssh user@your-vps-ip
-
-# Crear directorio de despliegue
-mkdir -p ~/apps/dj-didz
-cd ~/apps/dj-didz
-
-# Crear archivo .env
-nano .env
-# Agregar: DISCORD_TOKEN=your_token
-
-# Crear docker-compose.yml
-wget https://raw.githubusercontent.com/your-user/DJ-DIDZ/main/docker-compose.yml
-
-# Iniciar
-docker-compose up -d
-```
-
-## 📈 Monitoreo
-
-### Healthcheck
-El bot incluye verificación de salud automática:
-```bash
-node healthcheck.js  # Verifica si el bot está vivo
-docker-compose logs  # Ver logs del contenedor
-```
-
-### Datos Persistentes (Opcional)
-Para mantener logs persistentes:
-
-```bash
-# El docker-compose.yml ya incluye:
-volumes:
-  - ./logs:/app/logs
-```
-
-## 🔐 Seguridad
-
-✅ Variable `DISCORD_TOKEN` es sensible (nunca en git)  
-✅ Usuario no-root en Docker (por defecto)  
-✅ Validación de entrada en comandos  
-✅ Manejo seguro de errores (no expone stack traces)  
-✅ SSH keys para despliegue automático  
-
-## 🛠️ Troubleshooting
-
-### Bot no responde
-```bash
-# Verificar token
-docker-compose logs dj-didz
-
-# Reiniciar
-docker-compose restart dj-didz
-
-# Reconstruir imagen
-docker-compose up --build dj-didz
-```
-
-### Error de FFmpeg
-```bash
-# Asegurar que está instalado
-# En local: sudo apt-get install ffmpeg (Linux) o brew install ffmpeg (Mac)
-# En Docker: Ya está incluido en la imagen
-```
-
-### Contenedor se detiene
-```bash
-# Ver logs detallados
-docker-compose logs --tail 100 dj-didz
-
-# Verificar healthcheck
-docker-compose ps
-```
-
-## 📚 Recursos
-
-- [Discord.js Docs](https://discord.js.org)
-- [DisTube Docs](https://distube.js.org)
-- [Docker Compose Docs](https://docs.docker.com/compose)
-- [GitHub Actions Docs](https://docs.github.com/en/actions)
-
-## 📄 Licencia
-
-ISC
-
-## 👨‍💻 Autor
-
-DJ DIDZ - Discord Music Bot - 2024
 
 ---
 
-**¿Preguntas?** Abre un issue en GitHub.  
-**¿Mejoras?** Pull requests bienvenidos.
+## 📁 Project Structure
+
+```
+dj-didz/
+│
+├── 🎯 Core
+│   ├── index.js                    # Main entry point
+│   └── healthcheck.js              # Health monitoring
+│
+├── 📂 src/
+│   ├── commands/                   # 9 music commands
+│   │   ├── Command.js              # Base class
+│   │   ├── play.js, stop.js, ...   # Command modules
+│   │   └── loader.js               # Dynamic loader
+│   │
+│   ├── events/                     # Event handlers
+│   │   ├── client.js               # Discord events
+│   │   └── distube.js              # Music events
+│   │
+│   ├── middleware/
+│   │   └── rateLimiter.js          # Rate limiting
+│   │
+│   ├── utils/                      # Utilities
+│   │   ├── logger.js               # Winston logging 📊
+│   │   ├── embeds.js               # Discord embeds 🎨
+│   │   ├── validators.js           # Input validation ✅
+│   │   └── database.js             # Data persistence 💾
+│   │
+│   └── config/
+│       └── index.js                # Centralized config ⚙️
+│
+├── 🧪 tests/
+│   └── bot.test.js                 # Jest test suite
+│
+├── 🐳 Docker
+│   ├── Dockerfile                  # Multi-stage build
+│   └── docker-compose.yml          # Container orchestration
+│
+├── 📋 Logs & Data
+│   ├── logs/                       # Application logs 📝
+│   └── data/                       # User data 💾
+│
+└── ⚙️ Configuration
+    ├── .env.example                # Environment template
+    ├── .eslintrc.json             # Code quality rules
+    ├── .gitignore                 # Git ignore rules
+    └── package.json               # Dependencies
+```
+
+---
+
+## 🏗️ Architecture
+
+### From Monolith to Modular ⚡
+
+**Before (v1.0)**: Monolithic 250-line single file  
+**After (v2.0)**: 20+ modular files with clear separation of concerns
+
+```
+Command Execution Flow:
+┌─────────────┐
+│ Message     │
+│ Received    │
+└──────┬──────┘
+       ↓
+┌──────────────────────┐
+│ Rate Limiter Check   │ ⚡ Prevent spam
+└──────┬───────────────┘
+       ↓
+┌──────────────────────┐
+│ Parse Command        │ 📝 Extract args
+└──────┬───────────────┘
+       ↓
+┌──────────────────────┐
+│ Command Loader       │ 🔍 Find command
+└──────┬───────────────┘
+       ↓
+┌──────────────────────┐
+│ Validation           │ ✅ Input check
+└──────┬───────────────┘
+       ↓
+┌──────────────────────┐
+│ Execute Handler      │ 🎵 Run command
+└──────┬───────────────┘
+       ↓
+┌──────────────────────┐
+│ Error Handling       │ 🛡️ Safe recovery
+└──────┬───────────────┘
+       ↓
+┌──────────────────────┐
+│ Logging              │ 📊 Track event
+└──────────────────────┘
+```
+
+---
+
+## 🐳 Docker & Deployment
+
+### 🚀 Docker Compose (Recommended)
+
+```bash
+# 1️⃣  Start the bot
+docker-compose up -d
+
+# 2️⃣  View logs
+docker-compose logs -f dj-didz
+
+# 3️⃣  Stop the bot
+docker-compose down
+
+# 4️⃣  Restart
+docker-compose restart dj-didz
+
+# 5️⃣  Rebuild after code changes
+docker-compose up --build -d
+```
+
+### 🏗️ Manual Docker Build
+
+```bash
+# Build image
+docker build -t dj-didz:latest .
+
+# Run container
+docker run -d \
+  --name dj-didz \
+  -e DISCORD_TOKEN=your_token \
+  -e NODE_ENV=production \
+  dj-didz:latest
+
+# View logs
+docker logs -f dj-didz
+
+# Stop container
+docker stop dj-didz
+docker rm dj-didz
+```
+
+### 📊 Health Status
+
+```bash
+# Check if healthy
+docker ps
+
+# Should show STATUS: Up X seconds (healthy)
+docker-compose ps
+
+# Manual healthcheck
+node healthcheck.js
+```
+
+---
+
+## 🔄 CI/CD Pipeline
+
+### ✅ Automated Workflow
+
+The repository includes GitHub Actions that automatically:
+
+```
+┌─────────────┐
+│ Push Code   │
+└──────┬──────┘
+       ↓
+┌─────────────────────────────┐
+│ 1️⃣  Run ESLint              │ Code quality check
+└──────┬──────────────────────┘
+       ↓
+┌─────────────────────────────┐
+│ 2️⃣  Run Jest Tests          │ 20+ test cases
+└──────┬──────────────────────┘
+       ↓
+┌─────────────────────────────┐
+│ 3️⃣  Build Docker Image      │ Multi-stage build
+└──────┬──────────────────────┘
+       ↓
+┌─────────────────────────────┐
+│ 4️⃣  Push to Registry        │ Docker Hub/GHCR
+└──────┬──────────────────────┘
+       ↓
+┌─────────────────────────────┐
+│ 5️⃣  Deploy to VPS (optional)│ SSH deployment
+└─────────────────────────────┘
+```
+
+### 🔐 GitHub Secrets Setup
+
+Go to **Settings → Secrets and variables → Actions** and add:
+
+```
+🔑 DISCORD_TOKEN          → Your bot token
+🐳 DOCKER_HUB_USERNAME    → Docker Hub username
+🐳 DOCKER_HUB_TOKEN       → Docker Hub token
+🖥️  VPS_HOST              → VPS IP/domain
+👤 VPS_USER               → SSH username
+🔑 VPS_SSH_KEY            → Private SSH key
+```
+
+---
+
+## 📊 Logging & Monitoring
+
+### 📝 Log Levels
+
+```javascript
+logger.error('Critical error')   // 🔴 Errors only
+logger.warn('Warning message')   // 🟡 Warnings
+logger.info('Info message')      // 🟢 General info
+logger.debug('Debug info')       // 🔵 Detailed debug
+```
+
+### 📂 Log Files
+
+```
+logs/
+├── bot.log          # All logs (rotating)
+├── error.log        # Errors only
+└── 2024-03-18.log   # Daily rotation
+```
+
+### 👀 View Logs
+
+```bash
+# Docker logs
+docker-compose logs -f dj-didz
+
+# Local logs
+tail -f logs/bot.log
+
+# Last 100 lines
+tail -100 logs/bot.log
+```
+
+---
+
+## 🧪 Testing
+
+### ✅ Test Coverage
+
+```bash
+# Run all tests
+npm test
+
+# Watch mode (auto-reload)
+npm run test:watch
+
+# With coverage report
+npm test -- --coverage
+```
+
+### 📋 Test Categories
+
+- ✅ Configuration validation
+- ✅ Dependency checks
+- ✅ Utility functions
+- ✅ Project structure
+- ✅ Command loading
+- ✅ Rate limiter
+- ✅ Input validators
+
+---
+
+## 🆘 Troubleshooting
+
+### ❓ Common Issues
+
+#### Bot doesn't respond
+```bash
+# 1. Check token
+echo $DISCORD_TOKEN
+
+# 2. Verify running
+docker-compose ps
+
+# 3. Check logs
+docker-compose logs dj-didz
+
+# 4. Restart
+docker-compose restart dj-didz
+```
+
+#### FFmpeg not found
+```bash
+# Linux
+sudo apt-get install ffmpeg
+
+# macOS
+brew install ffmpeg
+
+# Windows
+choco install ffmpeg
+# Or download: https://ffmpeg.org/download.html
+```
+
+#### Port already in use
+```bash
+# Kill process using port 3000
+lsof -ti:3000 | xargs kill -9
+
+# Or use different port in docker-compose.yml
+```
+
+#### Container crashes
+```bash
+# View detailed logs
+docker-compose logs --tail 50 dj-didz
+
+# Check environment variables
+docker-compose config
+
+# Rebuild from scratch
+docker-compose down -v
+docker-compose up --build
+```
+
+---
+
+## 📚 Documentation Files
+
+| File | Purpose |
+|------|---------|
+| 📖 [README.md](README.md) | This file - Overview & quick start |
+| 🔄 [CHANGELOG.md](CHANGELOG.md) | Version history & changes |
+| 🏗️ [ARCHITECTURE.md](ARCHITECTURE.md) | Detailed architecture docs |
+| 🚀 [GITHUB-SETUP.md](GITHUB-SETUP.md) | GitHub integration guide |
+| 📝 [REFACTOR-SUMMARY.md](REFACTOR-SUMMARY.md) | v2.0.0 improvements |
+
+---
+
+## 🔗 Useful Links
+
+### 📚 Documentation
+- [Discord.js Official Docs](https://discord.js.org)
+- [DisTube Documentation](https://distube.js.org)
+- [Node.js Best Practices](https://nodejs.org/en/docs/)
+- [Docker Documentation](https://docs.docker.com)
+
+### 🛠️ Tools
+- [Discord Developer Portal](https://discord.com/developers/applications)
+- [FFmpeg Installation](https://ffmpeg.org/download.html)
+- [Node Version Manager](https://github.com/nvm-sh/nvm)
+
+### 💬 Community
+- [Discord.js Server](https://discord.gg/djs)
+- [DisTube Issues](https://github.com/skick1234/DisTube/issues)
+- [Node.js Community](https://nodejs.org/en/community/)
+
+---
+
+## 🤝 Contributing
+
+### 💡 How to Contribute
+
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Code** your changes with proper formatting
+4. **Test** with: `npm test && npm run lint`
+5. **Commit**: `git commit -m 'feat: add amazing feature'`
+6. **Push**: `git push origin feature/amazing-feature`
+7. **Pull Request** → main branch
+
+### 📋 Contributing Guidelines
+
+- ✅ Follow ESLint rules
+- ✅ Write tests for new features
+- ✅ Update documentation
+- ✅ Use meaningful commit messages
+- ✅ Keep code modular
+
+---
+
+## 📈 Performance
+
+### 🚀 Optimizations Included
+
+| Feature | Benefit |
+|---------|---------|
+| Event-driven architecture | ⚡ Low CPU usage |
+| Command caching | 💨 Fast execution |
+| Connection pooling | 📊 Efficient resources |
+| Error recovery | 🛡️ Stability |
+| Memory management | 💾 Stable memory |
+
+---
+
+## 📜 License
+
+```
+ISC License
+
+Copyright (c) 2024 DJ DIDZ
+
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted.
+```
+
+---
+
+## 🎉 Credits & Acknowledgments
+
+### 🙏 Built With
+
+- **[discord.js](https://discord.js.org)** - Discord API library
+- **[DisTube](https://distube.js.org)** - Music streaming library
+- **[Winston](https://github.com/winstonjs/winston)** - Logging framework
+- **[Jest](https://jestjs.io/)** - Testing framework
+- **[ESLint](https://eslint.org/)** - Code quality
+
+### 👨‍💻 Author
+
+**DJ DIDZ Development Team**  
+🌍 Operating from Arequipa, Peru  
+📧 For inquiries: [Create an issue](https://github.com/yourusername/dj-didz/issues)
+
+---
+
+<div align="center">
+
+### ⭐ If you find this useful, please star it! ⭐
+
+[🔝 Back to Top](#-features)
+
+**Made with ❤️ for the Discord community**
+
+</div>

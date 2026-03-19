@@ -18,7 +18,7 @@ try {
     const diff = now - lastModified;
 
     if (diff < 120000) { // 2 minutos
-      console.log('✅ Bot healthy');
+      console.error('✅ Bot healthy');
       process.exit(0);
     } else {
       console.error('❌ Bot heartbeat stale');
