@@ -1,20 +1,28 @@
 <!-- Header con ASCII Art -->
 <div align="center">
 
-```
-                                   DJ DIDZ
-       Advanced Discord Music Bot
-```
+# 🎵 DJ DIDZ - Advanced Discord Music Bot
 
-**Professional • Modular • Production-Ready**
+**Professional • Modular • Production-Ready • Open Source**
 
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org/)
 [![Discord.js](https://img.shields.io/badge/Discord.js-14.25-purple.svg)](https://discord.js.org/)
 [![Test Coverage](https://img.shields.io/badge/Tests-Jest-red.svg)](https://jestjs.io/)
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)](/)
+[![GitHub Stars](https://img.shields.io/github/stars/DarnerDiaz/DJ-DIDZ?style=social)](https://github.com/DarnerDiaz/DJ-DIDZ)
 
-[🎯 Features](#-features) • [🚀 Quick Start](#-quick-start) • [📚 Documentation](#-documentation) • [🐳 Docker](#-docker) • [🆘 Support](#-support)
+[📊 Features](#-features) • [🚀 Quick Start](#-quick-start) • [🏗️ Architecture](#-architecture) • [🐳 Docker](#-docker) • [📚 Docs](#-documentation) • [🆘 Support](#-support)
+
+</div>
+
+---
+
+## ✨ About
+
+DJ DIDZ es un bot avanzado de Discord para reproducir música con arquitectura modular, testing completo con Jest, pipeline CI/CD integrado y deployment en VPS. Diseñado para **producción** con más de **20 módulos** bien organizados.
+
+**[🌐 Ver Demo en vivo](#) • [📖 Documentación Completa](./REFACTOR-SUMMARY.md) • [🔧 Guía de Deploy](./DEPLOY.md)**
 
 </div>
 
@@ -575,3 +583,60 @@ for any purpose with or without fee is hereby granted.
 **Made with ❤️ for the Discord community**
 
 </div>
+
+---
+
+## 📖 Documentation & Resources
+
+- [REFACTOR-SUMMARY.md](./REFACTOR-SUMMARY.md) - Architecture & improvements
+- [DEPLOY.md](./DEPLOY.md) - Production deployment guide
+- [CHANGELOG.md](./CHANGELOG.md) - Version history
+- [Discord.js Docs](https://discord.js.org) - Official Discord.js documentation
+- [DisTube Docs](https://distube.js.org) - Music streaming library
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+Please ensure:
+- ✅ Code passes linting (`npm run lint`)
+- ✅ Tests pass (`npm test`)
+- ✅ JSDoc comments are added
+- ✅ CHANGELOG.md is updated
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+
+---
+
+## 🐛 Issues & Bugs
+
+Found a bug? Have a suggestion? Please [open an issue](https://github.com/DarnerDiaz/DJ-DIDZ/issues).
+
+**When reporting issues, include:**
+- Node.js version
+- Discord.js version
+- Full error message
+- Steps to reproduce
+
+---
+
+## 📝 License
+
+This project is licensed under the **ISC License** - see [LICENSE](./LICENSE) file for details.
+
+```
+ISC License (ISC)
+
+Copyright (c) 2024 DJ DIDZ
+
+Permission to use, copy, modify, and/or distribute this software
+for any purpose with or without fee is hereby granted.
+```
